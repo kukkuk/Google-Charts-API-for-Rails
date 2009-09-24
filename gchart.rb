@@ -10,6 +10,9 @@ class GChartBase
     @auto_scale = false
     @scale_low = nil
     @scale_high = nil
+    @title = nil
+    @title_color = nil
+    @title_size = nil
   end
 
   def scale_data!(data_points, options = {})
@@ -29,6 +32,8 @@ class GChartBase
 
     data_points.map! do |dp|
       dp = (dp - range_low) * scale
+      # round to 2 decimal places
+      dp = (dp * 100.0).round / 100.0
     end
   end
 
@@ -44,6 +49,20 @@ class GChartBase
     @scale_high = options[:scale_high] if options[:scale_high]
   end
 
+  def title(title, options = {})
+    @title = title
+    @title_color = options[:color] if options[:color]
+    @title_size = options[:size] if options[:size]
+  end
+
+  def title_color(color)
+    @title_color = color
+  end
+
+  def title_size(size)
+    @title_size = size
+  end
+
   def chart_type_to_url
     "cht=#{@chart_type}"
   end
@@ -57,8 +76,21 @@ class GChartBase
     "&chd=t:#{@data * ','}"
   end
 
+  def title_to_url
+    res = ''
+    if @title
+      res += "&chtt=#{@title}"
+      if @title_color
+        res += "&chts=#{@title_color}"
+        res += ",#{@title_size}" if @title_size
+      end
+    end
+
+    return res
+  end
+
   def to_url(html_options = {})
-    api_call = API_URL + chart_type_to_url + size_to_url + data_to_url
+    api_call = API_URL + chart_type_to_url + size_to_url + data_to_url + title_to_url
     res  = '<img src="' + api_call + '" '
     res += 'class="' + html_options[:class] + '" ' if html_options[:class]
     res += 'id="' + html_options[:id] + '" ' if html_options[:id]
@@ -104,9 +136,13 @@ class GChart < GChartBase
   end
 end
 
+# this is some test code
 puts '<html><body>'
+
 GChart.line(:class => 'line_charts') do |l|
   l.data_set :data => [100,20,100,300] 
-  l.auto_scale # :start_zero => true
+  l.auto_scale :start_zero => true
+  l.title 'My test chart', :color => 'ff0000', :size => 15
 end
+
 puts '</body></html>'
