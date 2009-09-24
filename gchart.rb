@@ -5,6 +5,11 @@ class GChartBase
     @chart_type = nil
     @width = 250
     @height = 100
+    @data = []
+    @labels = []
+    @auto_scale = false
+    @scale_low = nil
+    @scale_high = nil
   end
 
   def scale_data!(data_points, options = {})
@@ -27,6 +32,18 @@ class GChartBase
     end
   end
 
+  def data_set(options = {})
+    @data = options[:data] if options[:data]
+    @labels = options[:labels] if options[:labels]
+  end
+
+  def auto_scale(options = {})
+    @auto_scale = true
+    @scale_low = 0 if options[:start_zero]
+    @scale_low = options[:scale_low] if options[:scale_low]
+    @scale_high = options[:scale_high] if options[:scale_high]
+  end
+
   def chart_type_to_url
     "cht=#{@chart_type}"
   end
@@ -35,8 +52,13 @@ class GChartBase
     "&chs=#{@width}x#{@height}"
   end
 
+  def data_to_url
+    scale_data!(@data, :min => @scale_low) if @auto_scale
+    "&chd=#{@data * ','}"
+  end
+
   def to_url
-    API_URL + chart_type_to_url + size_to_url
+    API_URL + chart_type_to_url + size_to_url + data_to_url
   end
 end
 
@@ -78,5 +100,6 @@ end
 
 
 GChart.line do |l|
+  l.data_set :data => [10,20,30,40] 
+  l.auto_scale :start_zero => true
 end
-
