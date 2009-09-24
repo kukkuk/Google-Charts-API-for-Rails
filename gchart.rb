@@ -25,7 +25,7 @@ class GChartBase
     range_high = data_points.max unless range_high
 
     range = range_high - range_low
-    scale = 100 / range
+    scale = 100.0 / range
 
     data_points.map! do |dp|
       dp = (dp - range_low) * scale
@@ -54,11 +54,17 @@ class GChartBase
 
   def data_to_url
     scale_data!(@data, :min => @scale_low) if @auto_scale
-    "&chd=#{@data * ','}"
+    "&chd=t:#{@data * ','}"
   end
 
-  def to_url
-    API_URL + chart_type_to_url + size_to_url + data_to_url
+  def to_url(html_options = {})
+    api_call = API_URL + chart_type_to_url + size_to_url + data_to_url
+    res  = '<img src="' + api_call + '" '
+    res += 'class="' + html_options[:class] + '" ' if html_options[:class]
+    res += 'id="' + html_options[:id] + '" ' if html_options[:id]
+    res += '/>'
+
+    return res
   end
 end
 
@@ -90,16 +96,17 @@ class GChartXYLine < GChartLineBase
   end
 end
 
-class GChart
-  def self.line
+class GChart < GChartBase
+  def self.line(html_options = {})
     yield c = GChartLine.new
 
-    puts c.to_url
+    puts c.to_url(html_options)
   end
 end
 
-
-GChart.line do |l|
-  l.data_set :data => [10,20,30,40] 
-  l.auto_scale :start_zero => true
+puts '<html><body>'
+GChart.line(:class => 'line_charts') do |l|
+  l.data_set :data => [100,20,100,300] 
+  l.auto_scale # :start_zero => true
 end
+puts '</body></html>'
