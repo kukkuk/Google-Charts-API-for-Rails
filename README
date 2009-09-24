@@ -1,2 +1,12 @@
 The aim of this project is to make it simple to use the Google Charts API in your Rails App
+I've only just started, but will push changes a I go along.
 
+My aim is to write an DSL for Google Charts API. This DSL can be used in views like this:
+
+GChart.line do |l|
+  l.size :width => 250, :height => 200
+  l.data :source => @users, :labels => "username", :values => "age"
+end
+
+Where @users is an array of ActiveRecord objects. This should then draw the chart in your view by inserting something like this:
+<img src="http://chart.apis.google.com/chart?cht=lc&amp;chs=200x125&amp;chd=t:40,60,60,45,47,75,70,72"/>
