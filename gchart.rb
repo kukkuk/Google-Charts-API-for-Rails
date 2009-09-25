@@ -13,6 +13,10 @@ class GChartBase
     @title = nil
     @title_color = nil
     @title_size = nil
+    @axis_left = nil
+    @axis_right = nil
+    @axis_top = nil
+    @axis_botto = nil
   end
 
   def scale_data!(data_points, options = {})
@@ -63,6 +67,45 @@ class GChartBase
     @title_size = size
   end
 
+  def enable_left_axis
+    @axis_left = true
+  end
+
+  def enable_right_axis
+    @axis_right = true
+  end
+
+  def enable_top_axis
+    @axis_top = true
+  end
+
+  def enable_bottom_axis
+    @axis_bottom = true
+  end
+
+  def enable_axis(options = {})
+    @axis_left = true if options[:left]
+    @axis_right = true if options[:right]
+    @axis_top = true if options[:top]
+    @axis_bottom = true if options[:bottom]
+  end
+
+  # these methods change the settings into URL parameters
+  def axis_type_to_url
+    if @axis_left || @axis_right || @axis_bottom || @axis_top
+      res = []
+      res << 'x' if @axis_bottom
+      res << 't' if @axis_top
+      res << 'y' if @axis_left
+      res << 'r' if @axis_right
+
+      return "&chxt=#{res * ','}"
+    else
+      return ''
+    end
+    
+  end
+
   def chart_type_to_url
     "cht=#{@chart_type}"
   end
@@ -90,7 +133,7 @@ class GChartBase
   end
 
   def to_url(html_options = {})
-    api_call = API_URL + chart_type_to_url + size_to_url + data_to_url + title_to_url
+    api_call = API_URL + chart_type_to_url + size_to_url + data_to_url + title_to_url + axis_type_to_url
     res  = '<img src="' + api_call + '" '
     res += 'class="' + html_options[:class] + '" ' if html_options[:class]
     res += 'id="' + html_options[:id] + '" ' if html_options[:id]
@@ -143,6 +186,7 @@ GChart.line(:class => 'line_charts') do |l|
   l.data_set :data => [100,20,100,300] 
   l.auto_scale :start_zero => true
   l.title 'My test chart', :color => 'ff0000', :size => 15
+  l.enable_axis :left => true, :bottom => true
 end
 
 puts '</body></html>'
